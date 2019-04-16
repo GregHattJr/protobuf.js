@@ -277,9 +277,7 @@ function parse(source, root, options) {
     function ifBlock(obj, fnIf, fnElse) {
         var trailingLine = tn.line;
         if (obj) {
-            if(typeof obj.comment !== "string") {
-              obj.comment = cmnt(); // try block-type comment
-            }
+            obj.comment = cmnt(); // try block-type comment
             obj.filename = parse.filename;
             obj.line = tn.line;
         }
@@ -614,10 +612,6 @@ function parse(source, root, options) {
     }
 
     function parseMethod(parent, token) {
-        // Get the comment of the preceding line now (if one exists) in case the
-        // method is defined across multiple lines.
-        var commentText = cmnt();
-
         var type = token;
 
         /* istanbul ignore if */
@@ -649,7 +643,6 @@ function parse(source, root, options) {
         skip(")");
 
         var method = new Method(name, type, requestType, responseType, requestStream, responseStream);
-        method.comment = commentText;
         ifBlock(method, function parseMethod_block(token) {
 
             /* istanbul ignore else */
