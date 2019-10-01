@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 01:38:04 utc
+ * compiled tue, 01 oct 2019 13:25:48 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -1518,7 +1518,8 @@ common.get = function get(file) {
 var converter = exports;
 
 var Enum = require(15),
-    util = require(37);
+    util = require(37),
+    wrappers = require(41);
 
 /**
  * Generates a partial value fromObject conveter.
@@ -1544,7 +1545,9 @@ function genValuePartial_fromObject(gen, field, fieldIndex, prop) {
                     ("break");
             } gen
             ("}");
-        } else gen
+        } else if (wrappers[field.resolvedType.fullName]) gen
+            ("m%s=types[%i].fromObject(d%s)", prop, fieldIndex, prop);
+          else gen
             ("if(typeof d%s!==\"object\")", prop)
                 ("throw TypeError(%j)", field.fullName + ": object expected")
             ("m%s=types[%i].fromObject(d%s)", prop, fieldIndex, prop);
@@ -1804,7 +1807,7 @@ converter.toObject = function toObject(mtype) {
     /* eslint-enable no-unexpected-multiline, block-scoped-var, no-redeclare */
 };
 
-},{"15":15,"37":37}],13:[function(require,module,exports){
+},{"15":15,"37":37,"41":41}],13:[function(require,module,exports){
 "use strict";
 module.exports = decoder;
 
@@ -1961,7 +1964,7 @@ function encoder(mtype) {
         // Map fields
         if (field.map) {
             gen
-    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j)){", ref, field.name) // !== undefined && !== null
+    ("if(%s!=null&&m.hasOwnProperty(%j)){", ref, field.name) // !== undefined && !== null
         ("for(var ks=Object.keys(%s),i=0;i<ks.length;++i){", ref)
             ("w.uint32(%i).fork().uint32(%i).%s(ks[i])", (field.id << 3 | 2) >>> 0, 8 | types.mapKey[field.keyType], field.keyType);
             if (wireType === undefined) gen
@@ -1999,7 +2002,7 @@ function encoder(mtype) {
         // Non-repeated
         } else {
             if (field.optional) gen
-    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j))", ref, field.name); // !== undefined && !== null
+    ("if(%s!=null&&m.hasOwnProperty(%j))", ref, field.name); // !== undefined && !== null
 
             if (wireType === undefined)
         genTypePartial(gen, field, index, ref);
@@ -2013,7 +2016,6 @@ function encoder(mtype) {
     ("return w");
     /* eslint-enable no-unexpected-multiline, block-scoped-var, no-redeclare */
 }
-
 },{"15":15,"36":36,"37":37}],15:[function(require,module,exports){
 "use strict";
 module.exports = Enum;
@@ -3645,6 +3647,12 @@ function ReflectionObject(name, options) {
      * @type {string|null}
      */
     this.filename = null;
+
+    /**
+     * Defining file line number.
+     * @type {number|null}
+     */
+    this.line = null;
 }
 
 Object.defineProperties(ReflectionObject.prototype, {
@@ -4085,7 +4093,7 @@ function parse(source, root, options) {
         var filename = parse.filename;
         if (!insideTryCatch)
             parse.filename = null;
-        return Error("illegal " + (name || "token") + " '" + token + "' (" + (filename ? filename + ", " : "") + "line " + tn.line + ")");
+        return Error("illegal " + (name || "token") + " '" + token + "' (" + (filename ? filename + ", " : "") + "line " + tn.line + " offset " + tn.offset + " )");
     }
 
     function readString() {
@@ -4271,10 +4279,9 @@ function parse(source, root, options) {
     function ifBlock(obj, fnIf, fnElse) {
         var trailingLine = tn.line;
         if (obj) {
-            if(typeof obj.comment !== "string") {
-              obj.comment = cmnt(); // try block-type comment
-            }
+            obj.comment = cmnt(); // try block-type comment
             obj.filename = parse.filename;
+            obj.line = tn.line;
         }
         if (skip("{", true)) {
             var token;
@@ -4285,8 +4292,9 @@ function parse(source, root, options) {
             if (fnElse)
                 fnElse();
             skip(";");
+            var trailingComment = cmnt(trailingLine)
             if (obj && typeof obj.comment !== "string")
-                obj.comment = cmnt(trailingLine); // try line-type comment if no block
+                obj.comment = trailingComment; // try line-type comment if no block
         }
     }
 
@@ -4606,10 +4614,6 @@ function parse(source, root, options) {
     }
 
     function parseMethod(parent, token) {
-        // Get the comment of the preceding line now (if one exists) in case the
-        // method is defined across multiple lines.
-        var commentText = cmnt();
-
         var type = token;
 
         /* istanbul ignore if */
@@ -4641,7 +4645,6 @@ function parse(source, root, options) {
         skip(")");
 
         var method = new Method(name, type, requestType, responseType, requestStream, responseStream);
-        method.comment = commentText;
         ifBlock(method, function parseMethod_block(token) {
 
             /* istanbul ignore else */
@@ -5304,16 +5307,6 @@ Root.prototype.load = function load(filename, options, callback) {
             throw err;
         cb(err, root);
     }
-	
-    // Bundled definition existence checking
-    function getBundledFileName(filename) {
-        var idx = filename.lastIndexOf("google/protobuf/");
-        if (idx > -1) {
-            var altname = filename.substring(idx);
-            if (altname in common) return altname; 
-        }
-        return null;
-    }
 
     // Processes a single file
     function process(filename, source) {
@@ -5329,11 +5322,11 @@ Root.prototype.load = function load(filename, options, callback) {
                     i = 0;
                 if (parsed.imports)
                     for (; i < parsed.imports.length; ++i)
-                        if (resolved = (getBundledFileName(parsed.imports[i]) || self.resolvePath(filename, parsed.imports[i])))
+                        if (resolved = self.resolvePath(filename, parsed.imports[i]))
                             fetch(resolved);
                 if (parsed.weakImports)
                     for (i = 0; i < parsed.weakImports.length; ++i)
-                        if (resolved = (getBundledFileName(parsed.weakImports[i]) || self.resolvePath(filename, parsed.weakImports[i])))
+                        if (resolved = self.resolvePath(filename, parsed.weakImports[i]))
                             fetch(resolved, true);
             }
         } catch (err) {
@@ -5345,6 +5338,14 @@ Root.prototype.load = function load(filename, options, callback) {
 
     // Fetches a single file
     function fetch(filename, weak) {
+
+        // Strip path if this file references a bundled definition
+        var idx = filename.lastIndexOf("google/protobuf/");
+        if (idx > -1) {
+            var altname = filename.substring(idx);
+            if (altname in common)
+                filename = altname;
+        }
 
         // Skip if already loaded / attempted
         if (self.files.indexOf(filename) > -1)
@@ -6039,6 +6040,7 @@ function tokenize(source, alternateCommentMode) {
     var offset = 0,
         length = source.length,
         line = 1,
+        trailerCommentText = false,
         commentType = null,
         commentText = null,
         commentLine = 0,
@@ -6059,6 +6061,21 @@ function tokenize(source, alternateCommentMode) {
         return Error("illegal " + subject + " (line " + line + ")");
     }
 
+    function advance() {
+        return advanceTo(offset + 1)
+    }
+
+    function advanceTo(to) {
+        for (let index = offset + 1; index <= to; index++) {
+            if (charAt(index) === '\n') {
+                line++
+            }            
+        }
+        
+        offset = to
+        return offset
+    }
+
     /**
      * Reads a string till its end.
      * @returns {string} String read
@@ -6070,7 +6087,7 @@ function tokenize(source, alternateCommentMode) {
         var match = re.exec(source);
         if (!match)
             throw illegal("string");
-        offset = re.lastIndex;
+        advanceTo(re.lastIndex);
         push(stringDelim);
         stringDelim = null;
         return unescape(match[1]);
@@ -6094,8 +6111,7 @@ function tokenize(source, alternateCommentMode) {
      * @inner
      */
     function setComment(start, end) {
-        commentType = source.charAt(start++);
-        commentLine = line;
+        commentType = source.charAt(start++);        
         commentLineEmpty = false;
         var lookback;
         if (alternateCommentMode) {
@@ -6125,13 +6141,14 @@ function tokenize(source, alternateCommentMode) {
     }
 
     function isDoubleSlashCommentLine(startOffset) {
+        if (source[startOffset - 1] === "/")
+          return source[startOffset] === "/";
+
         var endOffset = findEndOfLine(startOffset);
 
         // see if remaining line matches comment pattern
         var lineText = source.substring(startOffset, endOffset);
-        // look for 1 or 2 slashes since startOffset would already point past
-        // the first slash that started the comment.
-        var isComment = /^\s*\/{1,2}/.test(lineText);
+        var isComment = /^\s*\/{2}/.test(lineText);
         return isComment;
     }
 
@@ -6164,14 +6181,14 @@ function tokenize(source, alternateCommentMode) {
                 return null;
             repeat = false;
             while (whitespaceRe.test(curr = charAt(offset))) {
-                if (curr === "\n")
-                    ++line;
-                if (++offset === length)
+                if (advance() === length)
                     return null;
             }
 
             if (charAt(offset) === "/") {
-                if (++offset === length) {
+                commentLine = line;
+
+                if (advance() === length) {
                     throw illegal("comment");
                 }
                 if (charAt(offset) === "/") { // Line
@@ -6179,17 +6196,17 @@ function tokenize(source, alternateCommentMode) {
                         // check for triple-slash comment
                         isDoc = charAt(start = offset + 1) === "/";
 
-                        while (charAt(++offset) !== "\n") {
+                        while (charAt(advance()) !== "\n") {
                             if (offset === length) {
                                 return null;
                             }
                         }
-                        ++offset;
+                        advance()
                         if (isDoc) {
                             setComment(start, offset - 1);
                         }
-                        ++line;
-                        repeat = true;
+
+                        repeat = !trailerCommentText;
                     } else {
                         // check for double-slash comments, consolidating consecutive lines
                         start = offset;
@@ -6197,45 +6214,46 @@ function tokenize(source, alternateCommentMode) {
                         if (isDoubleSlashCommentLine(offset)) {
                             isDoc = true;
                             do {
-                                offset = findEndOfLine(offset);
+                                advanceTo(findEndOfLine(offset));
                                 if (offset === length) {
                                     break;
                                 }
-                                offset++;
+                                advance();
                             } while (isDoubleSlashCommentLine(offset));
                         } else {
-                            offset = Math.min(length, findEndOfLine(offset) + 1);
+                            advance(Math.min(length, findEndOfLine(offset) + 1));
                         }
                         if (isDoc) {
                             setComment(start, offset);
                         }
-                        line++;
-                        repeat = true;
+                        
+                        repeat = !trailerCommentText;
                     }
                 } else if ((curr = charAt(offset)) === "*") { /* Block */
                     // check for /** (regular comment mode) or /* (alternate comment mode)
                     start = offset + 1;
                     isDoc = alternateCommentMode || charAt(start) === "*";
-                    do {
-                        if (curr === "\n") {
-                            ++line;
-                        }
-                        if (++offset === length) {
+                    do {                        
+                        if (advance() === length) {
                             throw illegal("comment");
                         }
                         prev = curr;
                         curr = charAt(offset);
                     } while (prev !== "*" || curr !== "/");
-                    ++offset;
+                    advance();
                     if (isDoc) {
                         setComment(start, offset - 2);
                     }
-                    repeat = true;
+                    repeat = !trailerCommentText;
                 } else {
                     return "/";
                 }
             }
         } while (repeat);
+
+        if (trailerCommentText) {
+            return null
+        }
 
         // offset !== length if we got here
 
@@ -6245,7 +6263,7 @@ function tokenize(source, alternateCommentMode) {
         if (!delim)
             while (end < length && !delimRe.test(charAt(end)))
                 ++end;
-        var token = source.substring(offset, offset = end);
+        var token = source.substring(offset, advanceTo(end));
         if (token === "\"" || token === "'")
             stringDelim = token;
         return token;
@@ -6305,29 +6323,40 @@ function tokenize(source, alternateCommentMode) {
     function cmnt(trailingLine) {
         var ret = null;
         if (trailingLine === undefined) {
-            if (commentLine === line - 1 && (alternateCommentMode || commentType === "*" || commentLineEmpty)) {
+            if (commentLine < line && (alternateCommentMode || commentType === "*" || commentLineEmpty)) {
                 ret = commentText;
+                commentText = null
             }
-        } else {
+        } else {            
             /* istanbul ignore else */
             if (commentLine < trailingLine) {
+                trailerCommentText = true;
                 peek();
+                trailerCommentText = false;
             }
             if (commentLine === trailingLine && !commentLineEmpty && (alternateCommentMode || commentType === "/")) {
                 ret = commentText;
+                commentText = null
             }
         }
+
+        
         return ret;
     }
 
-    return Object.defineProperty({
+    return Object.defineProperties({
         next: next,
         peek: peek,
         push: push,
         skip: skip,
         cmnt: cmnt
-    }, "line", {
-        get: function() { return line; }
+    }, {        
+        "line": {
+            get: function() { return line; }        
+        },
+        "offset": {
+            get: function() { return offset; }        
+        }
     });
     /* eslint-enable callback-return */
 }
@@ -7894,8 +7923,7 @@ util.toJSONOptions = {
     longs: String,
     enums: String,
     bytes: String,
-    json: true,
-    standard: false
+    json: true
 };
 
 // Sets up buffer utility according to the environment (called in index-minimal)
@@ -8109,7 +8137,6 @@ function verifier(mtype) {
 var wrappers = exports;
 
 var Message = require(21);
-var LongBits = require(38)
 
 /**
  * From object converter part of an {@link IWrapper}.
@@ -8184,223 +8211,7 @@ wrappers[".google.protobuf.Any"] = {
     }
 };
 
-wrappers[".google.protobuf.Timestamp"] = {
-    fromObject: function(object) {
-        if (typeof object === 'string') {
-            var dt = Date.parse(object);
-            if (isNaN(dt)) {
-                throw TypeError("Unable to parse to timestamp");
-            }
-            return this.fromObject({
-                seconds: Math.floor(dt/1000),
-                nanos: (dt % 1000) * 1000000
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return new Date(message.seconds*1000 + message.nanos/1000000).toISOString();
-        }
-        return this.toObject(message, options);
-    }
-};
-
-// wrappers[".google.protobuf.Duration"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'string') {
-//             let r = /-?\d+\.?\d*s$/
-//             if (object.match(r) === null) {
-//                 throw TypeError("Should be a number followed by s");
-//             }
-//             let duration = parseFloat(object);
-//             let seconds = parseInt(duration);
-//             let nanos = (duration - seconds) * 1000000000;
-//             return this.fromObject({
-//                 seconds: seconds,
-//                 nanos: nanos
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
-
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             let duration = message.seconds.toNumber();
-//             if (message.nanos !== 0) {
-//                 duration += message.nanos / 1000000000;
-//             }
-//             return `${duration}s`;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
-
-wrappers[".google.protobuf.DoubleValue"] = {
-    fromObject: function(object) {
-        if (typeof object === 'number') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-wrappers[".google.protobuf.FloatValue"] = {
-    fromObject: function(object) {
-        if (typeof object === 'number') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-// Not compiling 
-// wrappers[".google.protobuf.Int64Value"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'string') {
-//             if (isNaN(object)) {
-//                 throw TypeError("Should be a number");
-//             }
-//             var longbits = LongBits.from(object);
-//             return this.fromObject({
-//                 value: {
-//                     low: longbits.lo,
-//                     high: longbits.hi,
-//                     unsigned: false
-//                 }
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
-
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             var long = new LongBits(message.value.low, message.value.high);
-//             return `${long.toNumber(false)}`;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
-
-// wrappers[".google.protobuf.UInt64Value"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'string') {
-//             if (isNaN(object)) {
-//                 throw TypeError("Should be a number");
-//             }
-//             var longbits = LongBits.from(object);
-//             return this.fromObject({
-//                 value: {
-//                     low: longbits.lo,
-//                     high: longbits.hi,
-//                     unsigned: true
-//                 }
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
-
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             var long = new LongBits(message.value.low, message.value.high);
-//             return `${long.toNumber(true)}`;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
-
-wrappers[".google.protobuf.Int32Value"] = {
-    fromObject: function(object) {
-        if (typeof object === 'number') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-wrappers[".google.protobuf.UInt32Value"] = {
-    fromObject: function(object) {
-        if (typeof object === 'number') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-wrappers[".google.protobuf.StringValue"] = {
-    fromObject: function(object) {
-        if (typeof object === 'string') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-wrappers[".google.protobuf.BoolValue"] = {
-    fromObject: function(object) {
-        if (typeof object === 'boolean') {
-            return this.fromObject({
-                value: object
-            });
-        }
-        return this.fromObject(object);
-    },
-
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            return message.value;
-        }
-        return this.toObject(message, options);
-    }
-};
-
-},{"21":21,"38":38}],42:[function(require,module,exports){
+},{"21":21}],42:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 
