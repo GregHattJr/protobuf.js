@@ -164,9 +164,7 @@ wrappers[".google.protobuf.StringValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    var newMessage = new $root.google.protobuf.StringValue()
-    newMessage.value = message.value
-    return newMessage
+    return new $root.google.protobuf.StringValue.toObject(message, options)
   }
 };
 
@@ -219,7 +217,7 @@ wrappers[".google.protobuf.DoubleValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return new $root.google.protobuf.StringValue.toObject(message, options)
   }
 };
 

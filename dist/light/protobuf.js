@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 17:33:11 utc
+ * compiled mon, 18 nov 2019 17:42:09 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -6690,9 +6690,7 @@ wrappers[".google.protobuf.StringValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    var newMessage = new $root.google.protobuf.StringValue()
-    newMessage.value = message.value
-    return newMessage
+    return new $root.google.protobuf.StringValue.toObject(message, options)
   }
 };
 
@@ -6745,7 +6743,7 @@ wrappers[".google.protobuf.DoubleValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return new $root.google.protobuf.StringValue.toObject(message, options)
   }
 };
 
