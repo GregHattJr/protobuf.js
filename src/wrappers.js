@@ -144,14 +144,11 @@ wrappers[".google.protobuf.Timestamp"] = {
     }
 };
 
-
-
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
 
-        if ($root) {
-            if (object instanceof $root.google.protobuf.StringValue)
-                return object;
+        if(object && object.value && typeof object.value == 'string') {
+          return object
         }
 
         if (typeof object === 'string') {
@@ -171,6 +168,7 @@ wrappers[".google.protobuf.StringValue"] = {
 };
 
 
+// TODO Implement / check Duration wrapper
 // wrappers[".google.protobuf.Duration"] = {
 //     fromObject: function(object) {
 //         if (typeof object === 'string') {
@@ -188,7 +186,7 @@ wrappers[".google.protobuf.StringValue"] = {
 //         }
 //         return this.fromObject(object);
 //     },
-
+//
 //     toObject: function(message, options) {
 //         if (options && options.standard) {
 //             let duration = message.seconds.toNumber();
@@ -201,41 +199,47 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.DoubleValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.DoubleValue"] = {
+    fromObject: function fromObject(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function toObject(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
-// wrappers[".google.protobuf.FloatValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.FloatValue"] = {
+    fromObject: function fromObject(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function toObject(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
 // wrappers[".google.protobuf.Int64Value"] = {
 //     fromObject: function(object) {
@@ -254,7 +258,7 @@ wrappers[".google.protobuf.StringValue"] = {
 //         }
 //         return this.fromObject(object);
 //     },
-
+//
 //     toObject: function(message, options) {
 //         if (options && options.standard) {
 //             var long = new LongBits(message.value.low, message.value.high);
@@ -291,23 +295,27 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.Int32Value"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.Int32Value"] = {
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    fromObject: function fromObject(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function toObject(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
 // wrappers[".google.protobuf.UInt32Value"] = {
 //     fromObject: function(object) {
@@ -327,38 +335,20 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.StringValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'string') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.BoolValue"] = {
+    fromObject: function fromObject(object) {
+        if (typeof object === 'boolean') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
-
-// wrappers[".google.protobuf.BoolValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'boolean') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
-
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function toObject(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
