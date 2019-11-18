@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled thu, 19 jul 2018 00:33:25 utc
+ * compiled mon, 18 nov 2019 02:48:40 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -1961,7 +1961,7 @@ function encoder(mtype) {
         // Map fields
         if (field.map) {
             gen
-    ("if(%s!=null&&m.hasOwnProperty(%j)){", ref, field.name) // !== undefined && !== null
+    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j)){", ref, field.name) // !== undefined && !== null
         ("for(var ks=Object.keys(%s),i=0;i<ks.length;++i){", ref)
             ("w.uint32(%i).fork().uint32(%i).%s(ks[i])", (field.id << 3 | 2) >>> 0, 8 | types.mapKey[field.keyType], field.keyType);
             if (wireType === undefined) gen
@@ -1999,7 +1999,7 @@ function encoder(mtype) {
         // Non-repeated
         } else {
             if (field.optional) gen
-    ("if(%s!=null&&m.hasOwnProperty(%j))", ref, field.name); // !== undefined && !== null
+    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j))", ref, field.name); // !== undefined && !== null
 
             if (wireType === undefined)
         genTypePartial(gen, field, index, ref);
@@ -2013,6 +2013,7 @@ function encoder(mtype) {
     ("return w");
     /* eslint-enable no-unexpected-multiline, block-scoped-var, no-redeclare */
 }
+
 },{"15":15,"36":36,"37":37}],15:[function(require,module,exports){
 "use strict";
 module.exports = Enum;
@@ -3213,7 +3214,7 @@ Namespace.arrayToJSON = arrayToJSON;
 Namespace.isReservedId = function isReservedId(reserved, id) {
     if (reserved)
         for (var i = 0; i < reserved.length; ++i)
-            if (typeof reserved[i] !== "string" && reserved[i][0] <= id && reserved[i][1] >= id)
+            if (typeof reserved[i] !== "string" && reserved[i][0] <= id && reserved[i][1] > id)
                 return true;
     return false;
 };
@@ -4270,7 +4271,9 @@ function parse(source, root, options) {
     function ifBlock(obj, fnIf, fnElse) {
         var trailingLine = tn.line;
         if (obj) {
-            obj.comment = cmnt(); // try block-type comment
+            if(typeof obj.comment !== "string") {
+              obj.comment = cmnt(); // try block-type comment
+            }
             obj.filename = parse.filename;
         }
         if (skip("{", true)) {
@@ -4603,6 +4606,10 @@ function parse(source, root, options) {
     }
 
     function parseMethod(parent, token) {
+        // Get the comment of the preceding line now (if one exists) in case the
+        // method is defined across multiple lines.
+        var commentText = cmnt();
+
         var type = token;
 
         /* istanbul ignore if */
@@ -4634,6 +4641,7 @@ function parse(source, root, options) {
         skip(")");
 
         var method = new Method(name, type, requestType, responseType, requestStream, responseStream);
+        method.comment = commentText;
         ifBlock(method, function parseMethod_block(token) {
 
             /* istanbul ignore else */
@@ -4706,10 +4714,6 @@ function parse(source, root, options) {
                 break;
 
             case "option":
-
-                /* istanbul ignore if */
-                if (!head)
-                    throw illegal(token);
 
                 parseOption(ptr, token);
                 skip(";");
@@ -5300,6 +5304,16 @@ Root.prototype.load = function load(filename, options, callback) {
             throw err;
         cb(err, root);
     }
+	
+    // Bundled definition existence checking
+    function getBundledFileName(filename) {
+        var idx = filename.lastIndexOf("google/protobuf/");
+        if (idx > -1) {
+            var altname = filename.substring(idx);
+            if (altname in common) return altname; 
+        }
+        return null;
+    }
 
     // Processes a single file
     function process(filename, source) {
@@ -5315,11 +5329,11 @@ Root.prototype.load = function load(filename, options, callback) {
                     i = 0;
                 if (parsed.imports)
                     for (; i < parsed.imports.length; ++i)
-                        if (resolved = self.resolvePath(filename, parsed.imports[i]))
+                        if (resolved = (getBundledFileName(parsed.imports[i]) || self.resolvePath(filename, parsed.imports[i])))
                             fetch(resolved);
                 if (parsed.weakImports)
                     for (i = 0; i < parsed.weakImports.length; ++i)
-                        if (resolved = self.resolvePath(filename, parsed.weakImports[i]))
+                        if (resolved = (getBundledFileName(parsed.weakImports[i]) || self.resolvePath(filename, parsed.weakImports[i])))
                             fetch(resolved, true);
             }
         } catch (err) {
@@ -5331,14 +5345,6 @@ Root.prototype.load = function load(filename, options, callback) {
 
     // Fetches a single file
     function fetch(filename, weak) {
-
-        // Strip path if this file references a bundled definition
-        var idx = filename.lastIndexOf("google/protobuf/");
-        if (idx > -1) {
-            var altname = filename.substring(idx);
-            if (altname in common)
-                filename = altname;
-        }
 
         // Skip if already loaded / attempted
         if (self.files.indexOf(filename) > -1)
@@ -7888,7 +7894,8 @@ util.toJSONOptions = {
     longs: String,
     enums: String,
     bytes: String,
-    json: true
+    json: true,
+    standard: false
 };
 
 // Sets up buffer utility according to the environment (called in index-minimal)
@@ -8102,6 +8109,7 @@ function verifier(mtype) {
 var wrappers = exports;
 
 var Message = require(21);
+var LongBits = require(38)
 
 /**
  * From object converter part of an {@link IWrapper}.
@@ -8176,7 +8184,222 @@ wrappers[".google.protobuf.Any"] = {
     }
 };
 
-},{"21":21}],42:[function(require,module,exports){
+wrappers[".google.protobuf.Timestamp"] = {
+    fromObject: function(object) {
+        if (typeof object === 'string') {
+            var dt = Date.parse(object);
+            if (isNaN(dt)) {
+                throw TypeError("Unable to parse to timestamp");
+            }
+            return this.fromObject({
+                seconds: Math.floor(dt/1000),
+                nanos: (dt % 1000) * 1000000
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return new Date(message.seconds*1000 + message.nanos/1000000).toISOString();
+        }
+        return this.toObject(message, options);
+    }
+};
+
+// wrappers[".google.protobuf.Duration"] = {
+//     fromObject: function(object) {
+//         if (typeof object === 'string') {
+//             let regex = /-?\d+\.?\d*s$/
+//             if (object.match(regex) === null) {
+//                 throw TypeError("Should be a number followed by s");
+//             }
+//             let duration = parseFloat(object);
+//             let seconds = parseInt(duration);
+//             let nanos = (duration - seconds) * 1000000000;
+//             return this.fromObject({
+//                 seconds: seconds,
+//                 nanos: nanos
+//             });
+//         }
+//         return this.fromObject(object);
+//     },
+
+//     toObject: function(message, options) {
+//         if (options && options.standard) {
+//             let duration = message.seconds.toNumber();
+//             if (message.nanos !== 0) {
+//                 duration += message.nanos / 1000000000;
+//             }
+//             return `${duration}s`;
+//         }
+//         return this.toObject(message, options);
+//     }
+// };
+
+wrappers[".google.protobuf.DoubleValue"] = {
+    fromObject: function(object) {
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.FloatValue"] = {
+    fromObject: function(object) {
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.Int64Value"] = {
+    fromObject: function(object) {
+        if (typeof object === 'string') {
+            if (isNaN(object)) {
+                throw TypeError("Should be a number");
+            }
+            var longbits = LongBits.from(object);
+            return this.fromObject({
+                value: {
+                    low: longbits.lo,
+                    high: longbits.hi,
+                    unsigned: false
+                }
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            var long = new LongBits(message.value.low, message.value.high);
+            return long.toNumber(false);
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.UInt64Value"] = {
+    fromObject: function(object) {
+        if (typeof object === 'string') {
+            if (isNaN(object)) {
+                throw TypeError("Should be a number");
+            }
+            var longbits = LongBits.from(object);
+            return this.fromObject({
+                value: {
+                    low: longbits.lo,
+                    high: longbits.hi,
+                    unsigned: true
+                }
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            var long = new LongBits(message.value.low, message.value.high);
+            return long.toNumber(true);
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.Int32Value"] = {
+    fromObject: function(object) {
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.UInt32Value"] = {
+    fromObject: function(object) {
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.StringValue"] = {
+    fromObject: function(object) {
+        if (typeof object === 'string') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+wrappers[".google.protobuf.BoolValue"] = {
+    fromObject: function(object) {
+        if (typeof object === 'boolean') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
+
+},{"21":21,"38":38}],42:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 

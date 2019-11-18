@@ -1,5 +1,7 @@
 // DO NOT EDIT! This is a generated file. Edit the JSDoc in src/*.js instead and run 'npm run types'.
 
+import * as Long from "long";
+
 export as namespace protobuf;
 
 /**
@@ -1707,9 +1709,6 @@ export interface IConversionOptions {
 
     /** Performs additional JSON compatibility conversions, i.e. NaN and Infinity to strings */
     json?: boolean;
-
-    /** Performs additional protobuf JSON mapping compatibility conversions */
-    standard?: boolean;
 }
 
 /**
