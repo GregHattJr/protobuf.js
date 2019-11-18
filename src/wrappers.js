@@ -106,35 +106,35 @@ wrappers[".google.protobuf.Timestamp"] = {
     }
 };
 
-wrappers[".google.protobuf.Duration"] = {
-    fromObject: function(object) {
-        if (typeof object === 'string') {
-            let regex = /-?\d+\.?\d*s$/
-            if (object.match(regex) === null) {
-                throw TypeError("Should be a number followed by s");
-            }
-            let duration = parseFloat(object);
-            let seconds = parseInt(duration);
-            let nanos = (duration - seconds) * 1000000000;
-            return this.fromObject({
-                seconds: seconds,
-                nanos: nanos
-            });
-        }
-        return this.fromObject(object);
-    },
+// wrappers[".google.protobuf.Duration"] = {
+//     fromObject: function(object) {
+//         if (typeof object === 'string') {
+//             let regex = /-?\d+\.?\d*s$/
+//             if (object.match(regex) === null) {
+//                 throw TypeError("Should be a number followed by s");
+//             }
+//             let duration = parseFloat(object);
+//             let seconds = parseInt(duration);
+//             let nanos = (duration - seconds) * 1000000000;
+//             return this.fromObject({
+//                 seconds: seconds,
+//                 nanos: nanos
+//             });
+//         }
+//         return this.fromObject(object);
+//     },
 
-    toObject: function(message, options) {
-        if (options && options.standard) {
-            let duration = message.seconds.toNumber();
-            if (message.nanos !== 0) {
-                duration += message.nanos / 1000000000;
-            }
-            return `${duration}s`;
-        }
-        return this.toObject(message, options);
-    }
-};
+//     toObject: function(message, options) {
+//         if (options && options.standard) {
+//             let duration = message.seconds.toNumber();
+//             if (message.nanos !== 0) {
+//                 duration += message.nanos / 1000000000;
+//             }
+//             return `${duration}s`;
+//         }
+//         return this.toObject(message, options);
+//     }
+// };
 
 wrappers[".google.protobuf.DoubleValue"] = {
     fromObject: function(object) {
@@ -193,7 +193,7 @@ wrappers[".google.protobuf.Int64Value"] = {
     toObject: function(message, options) {
         if (options && options.standard) {
             var long = new LongBits(message.value.low, message.value.high);
-            return `${long.toNumber(false)}`;
+            return long.toNumber(false);
         }
         return this.toObject(message, options);
     }
@@ -220,7 +220,7 @@ wrappers[".google.protobuf.UInt64Value"] = {
     toObject: function(message, options) {
         if (options && options.standard) {
             var long = new LongBits(message.value.low, message.value.high);
-            return `${long.toNumber(true)}`;
+            return long.toNumber(true);
         }
         return this.toObject(message, options);
     }
