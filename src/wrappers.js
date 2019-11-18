@@ -8,6 +8,7 @@
 var wrappers = exports;
 
 var Message = require("./message");
+var $util = require('./util/minimal')
 var $root;
 
 /**

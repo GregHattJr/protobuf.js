@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled thu, 19 jul 2018 00:33:25 utc
+ * compiled mon, 18 nov 2019 03:09:24 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -1560,7 +1560,7 @@ function encoder(mtype) {
         // Map fields
         if (field.map) {
             gen
-    ("if(%s!=null&&m.hasOwnProperty(%j)){", ref, field.name) // !== undefined && !== null
+    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j)){", ref, field.name) // !== undefined && !== null
         ("for(var ks=Object.keys(%s),i=0;i<ks.length;++i){", ref)
             ("w.uint32(%i).fork().uint32(%i).%s(ks[i])", (field.id << 3 | 2) >>> 0, 8 | types.mapKey[field.keyType], field.keyType);
             if (wireType === undefined) gen
@@ -1598,7 +1598,7 @@ function encoder(mtype) {
         // Non-repeated
         } else {
             if (field.optional) gen
-    ("if(%s!=null&&m.hasOwnProperty(%j))", ref, field.name); // !== undefined && !== null
+    ("if(%s!=null&&Object.hasOwnProperty.call(m,%j))", ref, field.name); // !== undefined && !== null
 
             if (wireType === undefined)
         genTypePartial(gen, field, index, ref);
@@ -1612,6 +1612,7 @@ function encoder(mtype) {
     ("return w");
     /* eslint-enable no-unexpected-multiline, block-scoped-var, no-redeclare */
 }
+
 },{"14":14,"32":32,"33":33}],14:[function(require,module,exports){
 "use strict";
 module.exports = Enum;
@@ -2798,7 +2799,7 @@ Namespace.arrayToJSON = arrayToJSON;
 Namespace.isReservedId = function isReservedId(reserved, id) {
     if (reserved)
         for (var i = 0; i < reserved.length; ++i)
-            if (typeof reserved[i] !== "string" && reserved[i][0] <= id && reserved[i][1] >= id)
+            if (typeof reserved[i] !== "string" && reserved[i][0] <= id && reserved[i][1] > id)
                 return true;
     return false;
 };
@@ -4125,6 +4126,16 @@ Root.prototype.load = function load(filename, options, callback) {
             throw err;
         cb(err, root);
     }
+	
+    // Bundled definition existence checking
+    function getBundledFileName(filename) {
+        var idx = filename.lastIndexOf("google/protobuf/");
+        if (idx > -1) {
+            var altname = filename.substring(idx);
+            if (altname in common) return altname; 
+        }
+        return null;
+    }
 
     // Processes a single file
     function process(filename, source) {
@@ -4140,11 +4151,11 @@ Root.prototype.load = function load(filename, options, callback) {
                     i = 0;
                 if (parsed.imports)
                     for (; i < parsed.imports.length; ++i)
-                        if (resolved = self.resolvePath(filename, parsed.imports[i]))
+                        if (resolved = (getBundledFileName(parsed.imports[i]) || self.resolvePath(filename, parsed.imports[i])))
                             fetch(resolved);
                 if (parsed.weakImports)
                     for (i = 0; i < parsed.weakImports.length; ++i)
-                        if (resolved = self.resolvePath(filename, parsed.weakImports[i]))
+                        if (resolved = (getBundledFileName(parsed.weakImports[i]) || self.resolvePath(filename, parsed.weakImports[i])))
                             fetch(resolved, true);
             }
         } catch (err) {
@@ -4156,14 +4167,6 @@ Root.prototype.load = function load(filename, options, callback) {
 
     // Fetches a single file
     function fetch(filename, weak) {
-
-        // Strip path if this file references a bundled definition
-        var idx = filename.lastIndexOf("google/protobuf/");
-        if (idx > -1) {
-            var altname = filename.substring(idx);
-            if (altname in common)
-                filename = altname;
-        }
 
         // Skip if already loaded / attempted
         if (self.files.indexOf(filename) > -1)
@@ -6528,6 +6531,8 @@ function verifier(mtype) {
 var wrappers = exports;
 
 var Message = require(19);
+var $util = require(35)
+var $root;
 
 /**
  * From object converter part of an {@link IWrapper}.
@@ -6558,7 +6563,7 @@ var Message = require(19);
 // Custom wrapper for Any
 wrappers[".google.protobuf.Any"] = {
 
-    fromObject: function(object) {
+    fromObject: function fromObject(object) {
 
         // unwrap value type if mapped
         if (object && object["@type"]) {
@@ -6579,7 +6584,7 @@ wrappers[".google.protobuf.Any"] = {
         return this.fromObject(object);
     },
 
-    toObject: function(message, options) {
+    toObject: function toObject(message, options) {
 
         // decode value if requested and unmapped
         if (options && options.json && message.type_url && message.value) {
@@ -6602,7 +6607,65 @@ wrappers[".google.protobuf.Any"] = {
     }
 };
 
-},{"19":19}],38:[function(require,module,exports){
+// Custom wrapper for Timestamp.
+//
+// Implements the JSON serialization / deserialization as specified by
+// proto specification.
+//
+// https://github.com/protocolbuffers/protobuf/blob/5bc250b084b88b6ec98046054f5836b6b60132ef/src/google/protobuf/timestamp.proto#L101
+wrappers[".google.protobuf.Timestamp"] = {
+  fromObject: function fromObject(object) {
+        if (typeof object !== 'string') {
+            // for the static target, include the generated code.
+            if ($root) {
+                if (object instanceof $root.google.protobuf.Timestamp)
+                    return object;
+                var message = new $root.google.protobuf.Timestamp();
+                if (object.seconds != null)
+                    if ($util.Long)
+                        (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                    else if (typeof object.seconds === "string")
+                        message.seconds = parseInt(object.seconds, 10);
+                    else if (typeof object.seconds === "number")
+                        message.seconds = object.seconds;
+                    else if (typeof object.seconds === "object")
+                        message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                if (object.nanos != null)
+                    message.nanos = object.nanos | 0;
+                return message;
+            }
+
+            return this.fromObject(object);
+        }
+        //Convert ISO-8601 to epoch millis
+        var dt = Date.parse(object);
+        if (isNaN(dt)) {
+            // not a number, default to the parent implementation.
+            return this.fromObject(object);
+        }
+
+        return this.create({
+            seconds: Math.floor(dt/1000),
+            nanos: (dt % 1000) * 1000000
+        });
+    },
+
+    toObject: function toObject(message, options) {
+        // TODO: question for reviewer, how do we want to make this backwards
+        // compatible in a more explicit way. it seems dangerous to assume
+        // that anyone who was using .toJSON() was not relying on the old
+        // behaviour.
+
+        // decode value if requested
+        if (options && options.json) {
+            return new Date(message.seconds*1000 + message.nanos/1000000).toISOString();
+        }
+
+        return this.toObject(message, options);
+    }
+};
+
+},{"19":19,"35":35}],38:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 
