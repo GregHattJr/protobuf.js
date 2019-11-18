@@ -24,6 +24,8 @@
 [:hash:](https://github.com/dcodeIO/protobuf.js/commit/02482a69f0aaf32731b0155deec3a48cfa4c4151) Remove non-existent method from README ([#1119](https://github.com/dcodeIO/protobuf.js/issues/1119))<br />
 
 ## Other
+[:hash:](https://github.com/dcodeIO/protobuf.js/commit/67baf3db1712e149d0a3122d81ea6b3bbbe70209) Comment out additional wrappers<br />
+[:hash:](https://github.com/dcodeIO/protobuf.js/commit/1f1e3103be0eda277b0fcaa3b292b45fc66db424) Add additional wrappers<br />
 [:hash:](https://github.com/dcodeIO/protobuf.js/commit/c3134e0ceb25e04e83040069016faf77f8c16de6) attempt to correct for the static code scenario<br />
 [:hash:](https://github.com/dcodeIO/protobuf.js/commit/114ecc95e594d5c1bd5116dfc59ec5b82d140679) add tests, respect the { json: true } option<br />
 [:hash:](https://github.com/dcodeIO/protobuf.js/commit/19d513d391a9989753b09f4206bbe6ab59401ab9) do not use anonymous functions in wrapeprs<br />
