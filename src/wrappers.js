@@ -147,6 +147,11 @@ wrappers[".google.protobuf.Timestamp"] = {
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
 
+      if ($root) {
+        if (object instanceof $root.google.protobuf.Timestamp) {
+          return object;
+        }
+      }
         if(object && object.value && typeof object.value == 'string') {
           return object
         }
@@ -156,14 +161,14 @@ wrappers[".google.protobuf.StringValue"] = {
                 value: object
             });
         }
-        return this.fromObject(object);
+        return $root.google.protobuf.StringValue.fromObject(object);
     },
 
     toObject: function toObject(message, options) {
         if (options && options.standard) {
             return message.value;
         }
-        return this.toObject(message, options);
+        return $root.google.protobuf.StringValue.toObject(message, options);
     }
 };
 

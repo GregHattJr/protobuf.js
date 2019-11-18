@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 16:11:01 utc
+ * compiled mon, 18 nov 2019 16:38:23 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -6673,6 +6673,11 @@ wrappers[".google.protobuf.Timestamp"] = {
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
 
+      if ($root) {
+        if (object instanceof $root.google.protobuf.Timestamp) {
+          return object;
+        }
+      }
         if(object && object.value && typeof object.value == 'string') {
           return object
         }
@@ -6682,14 +6687,14 @@ wrappers[".google.protobuf.StringValue"] = {
                 value: object
             });
         }
-        return this.fromObject(object);
+        return $root.google.protobuf.StringValue.fromObject(object);
     },
 
     toObject: function toObject(message, options) {
         if (options && options.standard) {
             return message.value;
         }
-        return this.toObject(message, options);
+        return $root.google.protobuf.StringValue.toObject(message, options);
     }
 };
 

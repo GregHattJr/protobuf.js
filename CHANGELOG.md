@@ -1,9 +1,5 @@
 # [6.8.8](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.8)
 
-## Other
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/305cb52cddd68b7d1ca167a6e1bdb0e56177a91f) Add remaining from object / to object calls<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/878bf77bfaead1eb07621b17b8492c914035b867) Attempt root StringValue check<br />
-
 # [6.8.7](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.7)
 
 ## Fixed
