@@ -9,7 +9,9 @@ var wrappers = exports;
 
 var Message = require("./message");
 var $root;
+var $util = require('./util/minimal')
 var LongBits = require("./util/longbits")
+
 
 /**
  * From object converter part of an {@link IWrapper}.
