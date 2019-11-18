@@ -1,5 +1,8 @@
 # [6.8.8](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.8)
 
+## Other
+[:hash:](https://github.com/dcodeIO/protobuf.js/commit/878bf77bfaead1eb07621b17b8492c914035b867) Attempt root StringValue check<br />
+
 # [6.8.7](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.7)
 
 ## Fixed

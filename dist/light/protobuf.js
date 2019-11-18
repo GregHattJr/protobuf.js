@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 04:02:28 utc
+ * compiled mon, 18 nov 2019 04:08:43 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -6670,16 +6670,12 @@ wrappers[".google.protobuf.Timestamp"] = {
     }
 };
 
-
-
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
 
-        if ($root) {
-            if (object instanceof $root.google.protobuf.StringValue)
-                return object;
+        if(object && object.value && typeof object.value == 'string') {
+          return object
         }
-
         if (typeof object === 'string') {
             return this.fromObject({
                 value: object
@@ -6727,41 +6723,47 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.DoubleValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.DoubleValue"] = {
+    fromObject: function(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
-// wrappers[".google.protobuf.FloatValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.FloatValue"] = {
+    fromObject: function(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
 // wrappers[".google.protobuf.Int64Value"] = {
 //     fromObject: function(object) {
@@ -6780,7 +6782,7 @@ wrappers[".google.protobuf.StringValue"] = {
 //         }
 //         return this.fromObject(object);
 //     },
-
+//
 //     toObject: function(message, options) {
 //         if (options && options.standard) {
 //             var long = new LongBits(message.value.low, message.value.high);
@@ -6817,23 +6819,27 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.Int32Value"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'number') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.Int32Value"] = {
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    fromObject: function(object) {
+        if(object && object.value && typeof object.value == 'number') {
+            return object
+        }
+        if (typeof object === 'number') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
+
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
 // wrappers[".google.protobuf.UInt32Value"] = {
 //     fromObject: function(object) {
@@ -6853,41 +6859,23 @@ wrappers[".google.protobuf.StringValue"] = {
 //     }
 // };
 
-// wrappers[".google.protobuf.StringValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'string') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
+wrappers[".google.protobuf.BoolValue"] = {
+    fromObject: function(object) {
+        if (typeof object === 'boolean') {
+            return this.fromObject({
+                value: object
+            });
+        }
+        return this.fromObject(object);
+    },
 
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
-
-// wrappers[".google.protobuf.BoolValue"] = {
-//     fromObject: function(object) {
-//         if (typeof object === 'boolean') {
-//             return this.fromObject({
-//                 value: object
-//             });
-//         }
-//         return this.fromObject(object);
-//     },
-
-//     toObject: function(message, options) {
-//         if (options && options.standard) {
-//             return message.value;
-//         }
-//         return this.toObject(message, options);
-//     }
-// };
+    toObject: function(message, options) {
+        if (options && options.standard) {
+            return message.value;
+        }
+        return this.toObject(message, options);
+    }
+};
 
 },{"19":19,"34":34,"35":35}],38:[function(require,module,exports){
 "use strict";
