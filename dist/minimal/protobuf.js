@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled tue, 01 oct 2019 13:25:48 utc
+ * compiled mon, 18 nov 2019 02:16:57 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -2109,7 +2109,8 @@ util.toJSONOptions = {
     longs: String,
     enums: String,
     bytes: String,
-    json: true
+    json: true,
+    standard: false
 };
 
 // Sets up buffer utility according to the environment (called in index-minimal)
