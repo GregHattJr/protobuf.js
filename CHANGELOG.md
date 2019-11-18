@@ -1,43 +1,5 @@
 # [6.8.8](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.8)
 
-## Fixed
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/a932c741461cd6a00cfb78c42de333b425ef647c) Test Ntin fixes<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/d71bc938fd0fbb832bd645b2f8c0506c9b7e6202) change codegen to correctly respect src/wrappers.js<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/fb5d62fdc9bba52036f8ea3a7ec17c3c1292c99f) Fix minify build error in root.js<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/7bacfc8f34a1e096bca38a0ea38ecee089e8cdb5) fix typo ([#1241](https://github.com/dcodeIO/protobuf.js/issues/1241))<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/41b91535ce2737649d6b500131abc895f9f99fe8) fix stale links to API documentation ([#1235](https://github.com/dcodeIO/protobuf.js/issues/1235))<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/314b2dbbbc5a98b59cd81191c635dadc2a5e0584) Fix spacing in root.js again<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/f01e1d2c118f7d82fcc990ac7efe3b58588fb9ec) Fix spacing of root.js<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/b7ce052ff9a6e32a1c1ed94e8bac6cac324ac73c) Properly iterate and return method descriptors<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/b5b66321762a24c5ac2753b68331cbe115969da7) run npm audit fix ([#1208](https://github.com/dcodeIO/protobuf.js/issues/1208))<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/0ffa2a3cf943daef946753277d95b43df853122f) Fix indentation to match existing styles.<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/4af852395e82ba061b4e81fd19b3b4cd48342488) Fixed descriptor README code problem<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/1f32910873dab94c0c475e22dbdfc2d70f640a01) npm audit fixes<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/8a858634f3add3a2d8567f72699b907e9f543eca) Import Long types<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/15ee83ffa6cfd755ea04208110ddb5003adf98b1) Bundled definitions were loaded correctly<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/6fa4c3487c50f9e2647a384bf64cfb009752b6a7) Second part of a reserved range is exclusive ([#1122](https://github.com/dcodeIO/protobuf.js/issues/1122))<br />
-
-## CLI
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/7485d4b20b17adf8888ebf9cdc0e0b7a79f3b2f2) Add missing 'force-number' pbjs option<br />
-
-## Docs
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/02482a69f0aaf32731b0155deec3a48cfa4c4151) Remove non-existent method from README ([#1119](https://github.com/dcodeIO/protobuf.js/issues/1119))<br />
-
-## Other
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/67baf3db1712e149d0a3122d81ea6b3bbbe70209) Comment out additional wrappers<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/1f1e3103be0eda277b0fcaa3b292b45fc66db424) Add additional wrappers<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/c3134e0ceb25e04e83040069016faf77f8c16de6) attempt to correct for the static code scenario<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/114ecc95e594d5c1bd5116dfc59ec5b82d140679) add tests, respect the { json: true } option<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/19d513d391a9989753b09f4206bbe6ab59401ab9) do not use anonymous functions in wrapeprs<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/893180552531272f308467fb66a4d8664e670c3d) Implement wrapper for google.protobuf.Timestamp<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/4d490eb1bf71f5c5c4c9d253a2ffd36edea12386) Use Object.hasOwnProperty instead of prototype ([#1233](https://github.com/dcodeIO/protobuf.js/issues/1233))<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/2e1d1ace02322ac742edd5e0208fa1d512d4a817) Revert generated files, since other pull requests do not appear to<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/c72c752352347555406bafd7121acaed240fbf23) be more explicit about tested versions of nodejs ([#1213](https://github.com/dcodeIO/protobuf.js/issues/1213))<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/299f0ceed2087044bbc53dc20a274947a672c481) //github.com/protobufjs/protobuf.js/issues/1200<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/ea7b9c6fcfafab92d0b96fb372831afd14561943) Remove useless config import<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/9450f4d340519ad84a09e515a2795144d222e058) Add working rpcImpl with grpc node package<br />
-[:hash:](https://github.com/dcodeIO/protobuf.js/commit/892db94d0036e0e89f0cf9b4af21f6c349aadd00) allow file-level options everywhere in the file<br />
-
 # [6.8.7](https://github.com/dcodeIO/protobuf.js/releases/tag/6.8.7)
 
 ## Fixed

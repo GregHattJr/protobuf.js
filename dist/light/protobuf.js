@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 03:45:51 utc
+ * compiled mon, 18 nov 2019 04:02:28 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -1117,7 +1117,8 @@ utf8.write = function utf8_write(string, buffer, offset) {
 var converter = exports;
 
 var Enum = require(14),
-    util = require(33);
+    util = require(33),
+    wrappers = require(37);
 
 /**
  * Generates a partial value fromObject conveter.
@@ -1143,7 +1144,9 @@ function genValuePartial_fromObject(gen, field, fieldIndex, prop) {
                     ("break");
             } gen
             ("}");
-        } else gen
+        } else if (wrappers[field.resolvedType.fullName]) gen
+            ("m%s=types[%i].fromObject(d%s)", prop, fieldIndex, prop);
+          else gen
             ("if(typeof d%s!==\"object\")", prop)
                 ("throw TypeError(%j)", field.fullName + ": object expected")
             ("m%s=types[%i].fromObject(d%s)", prop, fieldIndex, prop);
@@ -1403,7 +1406,7 @@ converter.toObject = function toObject(mtype) {
     /* eslint-enable no-unexpected-multiline, block-scoped-var, no-redeclare */
 };
 
-},{"14":14,"33":33}],12:[function(require,module,exports){
+},{"14":14,"33":33,"37":37}],12:[function(require,module,exports){
 "use strict";
 module.exports = decoder;
 
@@ -6671,10 +6674,12 @@ wrappers[".google.protobuf.Timestamp"] = {
 
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
-        
-        if(object && object.value && typeof object.value == 'string') {
-          return object
+
+        if ($root) {
+            if (object instanceof $root.google.protobuf.StringValue)
+                return object;
         }
+
         if (typeof object === 'string') {
             return this.fromObject({
                 value: object

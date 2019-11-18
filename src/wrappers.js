@@ -148,10 +148,12 @@ wrappers[".google.protobuf.Timestamp"] = {
 
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
-        
-        if(object && object.value && typeof object.value == 'string') {
-          return object
+
+        if ($root) {
+            if (object instanceof $root.google.protobuf.StringValue)
+                return object;
         }
+
         if (typeof object === 'string') {
             return this.fromObject({
                 value: object
