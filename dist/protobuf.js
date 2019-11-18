@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 17:42:09 utc
+ * compiled mon, 18 nov 2019 17:59:50 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -8111,7 +8111,6 @@ function verifier(mtype) {
 var wrappers = exports;
 
 var Message = require(21);
-var LongBits = require(38)
 var $root
 var $util = require(39)
 
@@ -8267,7 +8266,7 @@ wrappers[".google.protobuf.StringValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return new $root.google.protobuf.StringValue.toObject(message, options)
+    return { value : message.value }
   }
 };
 
@@ -8309,10 +8308,10 @@ wrappers[".google.protobuf.DoubleValue"] = {
       return object
     }
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
-    }
+        var message = new $root.google.protobuf.DoubleValue()
+        message.value = object
+        return this.fromObject(message)
+      }
     return this.fromObject(object);
   },
 
@@ -8320,7 +8319,7 @@ wrappers[".google.protobuf.DoubleValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return new $root.google.protobuf.StringValue.toObject(message, options)
+    return { value : message.value }
   }
 };
 
@@ -8329,10 +8328,11 @@ wrappers[".google.protobuf.FloatValue"] = {
     if (object && object.value && typeof object.value == 'number') {
       return object
     }
+
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.FloatValue()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -8341,7 +8341,7 @@ wrappers[".google.protobuf.FloatValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value : message.value }
   }
 };
 
@@ -8406,9 +8406,9 @@ wrappers[".google.protobuf.Int32Value"] = {
       return object
     }
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.Int32Value()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -8417,7 +8417,7 @@ wrappers[".google.protobuf.Int32Value"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value: message.value }
   }
 };
 
@@ -8441,10 +8441,11 @@ wrappers[".google.protobuf.Int32Value"] = {
 
 wrappers[".google.protobuf.BoolValue"] = {
   fromObject: function fromObject(object) {
+
     if (typeof object === 'boolean') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.BoolValue()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -8453,11 +8454,11 @@ wrappers[".google.protobuf.BoolValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value: message.value }
   }
 };
 
-},{"21":21,"38":38,"39":39}],42:[function(require,module,exports){
+},{"21":21,"39":39}],42:[function(require,module,exports){
 "use strict";
 module.exports = Writer;
 

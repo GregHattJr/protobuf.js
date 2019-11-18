@@ -8,7 +8,6 @@
 var wrappers = exports;
 
 var Message = require("./message");
-var LongBits = require("./util/longbits")
 var $root
 var $util = require('./util/minimal')
 
@@ -164,7 +163,7 @@ wrappers[".google.protobuf.StringValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return new $root.google.protobuf.StringValue.toObject(message, options)
+    return { value : message.value }
   }
 };
 
@@ -206,10 +205,10 @@ wrappers[".google.protobuf.DoubleValue"] = {
       return object
     }
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
-    }
+        var message = new $root.google.protobuf.DoubleValue()
+        message.value = object
+        return this.fromObject(message)
+      }
     return this.fromObject(object);
   },
 
@@ -217,7 +216,7 @@ wrappers[".google.protobuf.DoubleValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return new $root.google.protobuf.StringValue.toObject(message, options)
+    return { value : message.value }
   }
 };
 
@@ -226,10 +225,11 @@ wrappers[".google.protobuf.FloatValue"] = {
     if (object && object.value && typeof object.value == 'number') {
       return object
     }
+
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.FloatValue()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -238,7 +238,7 @@ wrappers[".google.protobuf.FloatValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value : message.value }
   }
 };
 
@@ -303,9 +303,9 @@ wrappers[".google.protobuf.Int32Value"] = {
       return object
     }
     if (typeof object === 'number') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.Int32Value()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -314,7 +314,7 @@ wrappers[".google.protobuf.Int32Value"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value: message.value }
   }
 };
 
@@ -338,10 +338,11 @@ wrappers[".google.protobuf.Int32Value"] = {
 
 wrappers[".google.protobuf.BoolValue"] = {
   fromObject: function fromObject(object) {
+
     if (typeof object === 'boolean') {
-      return this.fromObject({
-        value: object
-      });
+      var message = new $root.google.protobuf.BoolValue()
+      message.value = object
+      return this.fromObject(message)
     }
     return this.fromObject(object);
   },
@@ -350,6 +351,6 @@ wrappers[".google.protobuf.BoolValue"] = {
     if (options && options.standard) {
       return message.value;
     }
-    return this.toObject(message, options);
+    return { value: message.value }
   }
 };
