@@ -1,6 +1,6 @@
 /*!
  * protobuf.js v6.8.8 (c) 2016, daniel wirtz
- * compiled mon, 18 nov 2019 16:38:23 utc
+ * compiled mon, 18 nov 2019 16:53:42 utc
  * licensed under the bsd-3-clause license
  * see: https://github.com/dcodeio/protobuf.js for details
  */
@@ -6618,6 +6618,7 @@ wrappers[".google.protobuf.Any"] = {
 // proto specification.
 //
 // https://github.com/protocolbuffers/protobuf/blob/5bc250b084b88b6ec98046054f5836b6b60132ef/src/google/protobuf/timestamp.proto#L101
+
 wrappers[".google.protobuf.Timestamp"] = {
   fromObject: function fromObject(object) {
         if (typeof object !== 'string') {
@@ -6672,9 +6673,11 @@ wrappers[".google.protobuf.Timestamp"] = {
 
 wrappers[".google.protobuf.StringValue"] = {
     fromObject: function fromObject(object) {
+      var original = [".google.protobuf.StringValue"]
+      var originalFromObject =wrappers[".google.protobuf.StringValue"].fromObject
 
       if ($root) {
-        if (object instanceof $root.google.protobuf.Timestamp) {
+        if (object instanceof original) {
           return object;
         }
       }
@@ -6687,14 +6690,15 @@ wrappers[".google.protobuf.StringValue"] = {
                 value: object
             });
         }
-        return $root.google.protobuf.StringValue.fromObject(object);
+        return originalFromObject(object);
     },
 
     toObject: function toObject(message, options) {
+      var originalToObject = wrappers[".google.protobuf.StringValue"].toObject
         if (options && options.standard) {
             return message.value;
         }
-        return $root.google.protobuf.StringValue.toObject(message, options);
+        return originalToObject(message, options)
     }
 };
 
